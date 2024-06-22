@@ -74,10 +74,11 @@ func main() {
 	// r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 	// 	w.Write([]byte("welcome"))
 	// })
-	r.Group(func(r chi.Router) {
-		r.Use(middleware.Logger)
-		r.Get("/users/{userID}", usersHandler)
-	})
+	// r.Group(func(a chi.Router) {
+	// 	a.Use(middleware.Logger)
+	// 	a.Get("/users/{userID}", usersHandler)
+	// })
+	r.With(middleware.Logger).Get("/users/{userID}", usersHandler)
 	r.Get("/", homeHandler)
 	r.Get("/contact", homeHandler)
 	r.Get("/faq", faqHandler)
