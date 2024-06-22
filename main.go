@@ -11,7 +11,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	fmt.Fprint(w, `
 	<h2>
-		Hi this work is awesome
+		Hi this work is awesome!
 	</h2>
 	`)
 
