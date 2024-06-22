@@ -53,31 +53,8 @@ func faqHandler(w http.ResponseWriter, r *http.Request) {
 	`)
 }
 
-// type Router struct{}
-
-//	func (router Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-//		fmt.Println("goning  now on 3000")
-//		switch r.URL.Path {
-//		case "/":
-//			homeHandler(w, r)
-//		case "/faq":
-//			faqHandler(w, r)
-//		case "/contact":
-//			contactHandler(w, r)
-//		default:
-//			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-//		}
-//	}
 func main() {
 	r := chi.NewRouter()
-	// r.Use(middleware.Logger)
-	// r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-	// 	w.Write([]byte("welcome"))
-	// })
-	// r.Group(func(a chi.Router) {
-	// 	a.Use(middleware.Logger)
-	// 	a.Get("/users/{userID}", usersHandler)
-	// })
 	r.With(middleware.Logger).Get("/users/{userID}", usersHandler)
 	r.Get("/", homeHandler)
 	r.Get("/contact", homeHandler)
