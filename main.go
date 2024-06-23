@@ -19,7 +19,12 @@ func executeTemplate(w http.ResponseWriter, filepath string) {
 		http.Error(w, "There was error parsing the template.", http.StatusInternalServerError)
 		return
 	}
-	err = t.Execute(w, nil)
+	user := struct {
+		Name string
+	}{
+		Name: "Raminder",
+	}
+	err = t.Execute(w, user)
 	if err != nil {
 		log.Printf("Execution template error: %v", err)
 		http.Error(w, "There was error executing the template.", http.StatusInternalServerError)
