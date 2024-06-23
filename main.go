@@ -2,22 +2,30 @@ package main
 
 import (
 	"fmt"
+	"html/template"
+	"log"
 	"net/http"
+	"path/filepath"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
-	bio := `<script>alert("Haha, you have been h4x0r3d!");</script>`
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	fmt.Fprint(w, `
-	<h2>
-		My Contact:
-	</h2>
-	<p> Email me at <a href=\"mailto:jon@live.com\">jon@live.com</a.</p>
-	<p> your bio is:`+bio+`</p>
-	`)
+	tpath := filepath.Join("templates", "home.gohtml")
+	t, err := template.ParseFiles(tpath)
+	if err != nil {
+		log.Printf("Parsing template error: %v", err)
+		http.Error(w, "There was error parsing the template.", http.StatusInternalServerError)
+		return
+	}
+	err = t.Execute(w, nil)
+	if err != nil {
+		log.Printf("Execution template error: %v", err)
+		http.Error(w, "There was error executing the template.", http.StatusInternalServerError)
+		return
+	}
 }
 
 func usersHandler(w http.ResponseWriter, r *http.Request) {
