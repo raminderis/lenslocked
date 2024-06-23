@@ -9,12 +9,14 @@ import (
 )
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
+	bio := `<script>alert("Haha, you have been h4x0r3d!");</script>`
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	fmt.Fprint(w, `
 	<h2>
 		My Contact:
 	</h2>
-	<p> Email me at <a href=\"mailto:jon@live.com\">jon@live.com</a.</p>>
+	<p> Email me at <a href=\"mailto:jon@live.com\">jon@live.com</a.</p>
+	<p> your bio is:`+bio+`</p>
 	`)
 }
 
