@@ -1,5 +1,5 @@
-#config files
-./modd.conf
+#Configuration files
+modd.conf
 
-#binary
-./lenslocked
+#Compiled Go binary
+lenslocked
