@@ -19,6 +19,7 @@ func main() {
 	fmt.Println("Starting the server on :3000...")
 	err := http.ListenAndServe(":3000", nil)
 	if err != nil {
+		_ = fmt.Errorf("error starting the server: %v", err)
 		panic(err)
 	}
 }
