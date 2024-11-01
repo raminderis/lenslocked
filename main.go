@@ -8,7 +8,7 @@ import (
 func handlerFunc(w http.ResponseWriter, r *http.Request) {
 	//set status code as 200 ok
 	w.WriteHeader(http.StatusOK)
-	_, err := fmt.Fprint(w, "<h1>Welcome to my wonderful site</h1>")
+	_, err := fmt.Fprint(w, "<h1>Welcome to my awesome site</h1>")
 	if err != nil {
 		return
 	}
