@@ -9,55 +9,36 @@ import (
 	"path/filepath"
 )
 
-func homeHandler(w http.ResponseWriter, r *http.Request) {
+// parse and return template
+// execute the given template
+func executeTemplate(w http.ResponseWriter, tplPath string, data interface{}) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	tplPath := filepath.Join("templates", "home.gohtml")
 	tpl, err := template.ParseFiles(tplPath)
 	if err != nil {
 		log.Printf("Error parsing template: %v", err)
 		http.Error(w, "There was error parsing the template", http.StatusInternalServerError)
 		return
 	}
-	err = tpl.Execute(w, nil)
+	err = tpl.Execute(w, data)
 	if err != nil {
 		log.Printf("Error executing template: %v", err)
 		http.Error(w, "There was error executing the template", http.StatusInternalServerError)
-		return
 	}
+}
+
+func homeHandler(w http.ResponseWriter, r *http.Request) {
+	tplPath := filepath.Join("templates", "home.gohtml")
+	executeTemplate(w, tplPath, nil)
 }
 
 func contactHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	tplPath := filepath.Join("templates", "contact.gohtml")
-	tpl, err := template.ParseFiles(tplPath)
-	if err != nil {
-		log.Printf("Error parsing template: %v", err)
-		http.Error(w, "There was error parsing the template", http.StatusInternalServerError)
-		return
-	}
-	err = tpl.Execute(w, nil)
-	if err != nil {
-		log.Printf("Error executing template: %v", err)
-		http.Error(w, "There was error executing the template", http.StatusInternalServerError)
-		return
-	}
+	executeTemplate(w, tplPath, nil)
 }
 
 func faqHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	tplPath := filepath.Join("templates", "faq.gohtml")
-	tpl, err := template.ParseFiles(tplPath)
-	if err != nil {
-		log.Printf("Error parsing template: %v", err)
-		http.Error(w, "There was error parsing the template", http.StatusInternalServerError)
-		return
-	}
-	err = tpl.Execute(w, nil)
-	if err != nil {
-		log.Printf("Error executing template: %v", err)
-		http.Error(w, "There was error executing the template", http.StatusInternalServerError)
-		return
-	}
+	executeTemplate(w, tplPath, nil)
 }
 
 func main() {
