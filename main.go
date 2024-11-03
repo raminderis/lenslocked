@@ -10,8 +10,9 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	//set status code as 200 ok
 	//w.WriteHeader(http.StatusOK)
 	//set content-type header
+	bio := `&lt;script&gt;alert(&#34;hello you are hacked&#34;)&lt;/script&gt;`
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	_, err := fmt.Fprint(w, "<h1>Welcome to my awesome site</h1>")
+	_, err := fmt.Fprint(w, "<h1>Welcome to my awesome site</h1><p>Bio: "+bio+"</p>")
 	if err != nil {
 		return
 	}
