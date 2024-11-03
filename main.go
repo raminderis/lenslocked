@@ -3,33 +3,61 @@ package main
 import (
 	"fmt"
 	"github.com/go-chi/chi/v5"
+	"html/template"
+	"log"
 	"net/http"
+	"path/filepath"
 )
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
-	//set status code as 200 ok
-	//w.WriteHeader(http.StatusOK)
-	//set content-type header
-	bio := `&lt;script&gt;alert(&#34;hello you are hacked&#34;)&lt;/script&gt;`
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	_, err := fmt.Fprint(w, "<h1>Welcome to my awesome site</h1><p>Bio: "+bio+"</p>")
+	tplPath := filepath.Join("templates", "home.gohtml")
+	tpl, err := template.ParseFiles(tplPath)
 	if err != nil {
+		log.Printf("Error parsing template: %v", err)
+		http.Error(w, "There was error parsing the template", http.StatusInternalServerError)
+		return
+	}
+	err = tpl.Execute(w, nil)
+	if err != nil {
+		log.Printf("Error executing template: %v", err)
+		http.Error(w, "There was error executing the template", http.StatusInternalServerError)
 		return
 	}
 }
 
 func contactHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	fmt.Fprint(w, "<h1>Contact us</h1><p> Get in touch with me at <a href=\"mailto:raminder@live.com\">raminder@live.com</a></p>")
+	tplPath := filepath.Join("templates", "contact.gohtml")
+	tpl, err := template.ParseFiles(tplPath)
+	if err != nil {
+		log.Printf("Error parsing template: %v", err)
+		http.Error(w, "There was error parsing the template", http.StatusInternalServerError)
+		return
+	}
+	err = tpl.Execute(w, nil)
+	if err != nil {
+		log.Printf("Error executing template: %v", err)
+		http.Error(w, "There was error executing the template", http.StatusInternalServerError)
+		return
+	}
 }
 
 func faqHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	fmt.Fprint(w, "<h1>FAQ Page:</h1>"+
-		"<ul>"+
-		"<li><b>Do you have free version</b><p>A. gibberish</p>"+
-		"<li><b>Do you have paid version</b><p>A. yes</p>"+
-		"</ul>")
+	tplPath := filepath.Join("templates", "faq.gohtml")
+	tpl, err := template.ParseFiles(tplPath)
+	if err != nil {
+		log.Printf("Error parsing template: %v", err)
+		http.Error(w, "There was error parsing the template", http.StatusInternalServerError)
+		return
+	}
+	err = tpl.Execute(w, nil)
+	if err != nil {
+		log.Printf("Error executing template: %v", err)
+		http.Error(w, "There was error executing the template", http.StatusInternalServerError)
+		return
+	}
 }
 
 func main() {
