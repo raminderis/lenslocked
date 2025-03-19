@@ -1,0 +1,5 @@
+./modd.conf
+
+#all bin files
+*.bin
+./lenslocked
