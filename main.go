@@ -95,7 +95,7 @@ func main() {
 	// var router http.HandlerFunc = pathHandler
 	http.HandleFunc("/", http.HandlerFunc(pathHandler).ServeHTTP)
 	// http.Handle("/", http.HandlerFunc(pathHandler))
-	fmt.Println("Starting the server on :3000...")
+	fmt.Println("In main now Starting the server on :3000...")
 	// http.ListenAndServe(":3000", nil)
 	http.ListenAndServe(":3000", somePathHandler)
 	// http.ListenAndServe(":3000", router)
