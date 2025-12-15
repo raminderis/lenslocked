@@ -1,0 +1,179 @@
+THOUGHTS:
+Interface: doesnt do any work, but defines what functionality you need. just defines methods doesnt implement them.
+Type: actually define the type, what the type needs to have. Type has details and implementation, and it implements the interfaces. As such X is of type interface if it implements all the methods defined in that interface. 
+Saying: Return structs, accept Interfaces.
+
+COURSE:
+Start Date: 6/20/2024
+End Date: 7/9/2024 (minus galleries and photos session will do it later)
+https://www.usegolang.com/ (login raminderis@live.com / gencob-Kymfu1-cuppav)
+login takes you to:  https://courses.calhoun.io/courses
+Paid lic for web development course: key_HQQnSkWNkHOLYIsfHv8OrQmR2iUVnD5K has been applied to your account.
+
+Versioning:
+https://simver.org/
+
+Dynamic Reloading:
+https://github.com/cortesi/modd
+https://github.com/cosmtrek/air
+
+PATH and RawPath
+# Path always carries decoded incoming URL 
+# if the decoded version of the incoming URL is diff then the incoming URL itself, 
+# then RawPath will carry the raw URL as is received. 
+# so if the URL is exmaple.com:3000/contact%2Fcat instead of example.com:3000/contact/cat then rawpath will be there. 
+# otherwise rawpath stays empty 
+
+ServMux 3rd Party alternative:
+https://github.com/go-chi/chi (using this one)
+https://github.com/gorilla/mux
+
+Template Library 3rd Party alternative:
+https://github.com/gobuffalo/plush
+
+HTML CHAR CODING:
+https://www.rapidtables.com/web/html/html-codes.html
+
+Getting started with Git:
+https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup
+
+Code Structure:
+https://www.gobeyond.dev/standard-package-layout/
+Kat Zien Gophercon 2018 shows different ways to structure the same code. On Youtube at https://www.youtube.com/watch?v=oL6JBUk6tj0
+https://github.com/katzien/go-structure-examples
+
+Cross Site Scripting
+> someone is able to run their scripts through your website. 
+	idea is dont render directly what you ask for from other people. Because they might give you something like this: "<script>alert("Haha, you have been h4x0r3d!")</script>"
+	so you escape and encode it. html/template package does it for you automatically before rendering the page. 
+	
+Code Injection:
+> SQL Injection - can potentially drop tables. 
+	eg: Name = "Robert');DROP TABLE Students;"
+	This can drop Students table and delete a bunch of data.
+	
+
+
+Closure:
+https://www.calhoun.io/closures-in-go/
+
+
+CSS:
+https://tailwindcss.com/
+(from meta backend course on coursera)other options are:
+ https://getbootstrap.com/docs/5.3/getting-started/introduction/
+ https://andybrewer.github.io/mvp/
+ https://getuikit.com/
+ https://pure-css.github.io/
+ https://get.foundation/
+ 
+HTML:
+Forms details: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/form
+input: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input
+
+Rest:
+https://www.codecademy.com/article/what-is-rest
+
+
+Parsing Forms:
+https://github.com/gorilla/schema
+
+Databases:
+https://www.postgresql.org/docs/current/datatype.html
+https://www.postgresql.org/docs/current/ddl-constraints.html
+go sql lib:  https://pkg.go.dev/database/sql
+go postgres driver: https://github.com/jackc/pgx
+migration tool: https://github.com/pressly/goose
+migration tool: https://github.com/golang-migrate/migrate
+SW Versioning Problem with Migration:
+> git stash
+> git pull origin master --rebase
+> git stash apply  (apply your changes to the latest code)
+> goose fix (renames to order migrations versions correctly)
+
+HTTP Methods:
+https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods
+
+Cookie:
+https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies
+https://github.com/gorilla/csrf
+
+Sessions:
+https://owasp.org/www-community/vulnerabilities/Insufficient_Session-ID_Length
+
+EMAIL:
+> we are going to use SMTP, and any of the three below should support SMTP:
+	* mailtrap (use this with gmail account)
+	* sendgrid
+	* sendinblue
+	* mailgun
+> library building emails:
+	* https://github.com/go-gomail/gomail
+
+ENV:
+https://github.com/joho/godotenv
+
+ICONS:
+https://heroicons.com
+
+
+Tailwind build:
+https://tailwindcss.com/docs/installation
+
+Caddy:
+https://caddyserver.com/
+
+Logging:
+https://app.highlight.io/
+
+For Domain:
+squarespace.com
+dnsimple.com
+
+For Passwords hashing functions:
+bcrypt
+scrypt
+argon2
+
+Deployment:
+Digital Ocean (acc: howitmatters)
+
+Course:
+1. Slack: UseGolang
+2. Github: https://github.com/calhounio
+3. Interfaces: https://clahoun.io/crash-course-on-go-interfaces
+4. Templates: https://www.calhoun.io/intro-to-templates/
+
+Server side rendering vs API client side processing:
+1. complexity - adds unnecessary complexity if not needed. 
+2. authentication - jwt we need to worry about token management in client side rendering before we hit api.
+3. full implementation in backend simply deliver htmls.
+4. doesnt need single page feel. if single feel is needed like fb or gmail, then use api based instead of server side rendering. diff version - laptops, desktops, phones, lite version for slow internet connections. 
+    for single page, use react, angular, vue, javascript, etc.
+
+ 
+ Resources:
+https://go.dev/solutions/webdev#get-started
+https://gophercises.com/#signup
+https://algorithmswithgo.com/
+https://go.dev/doc/articles/wiki/
+https://www.gobeyond.dev/ Ben Johnsons
+https://pace.dev/ now acquired by grafanalabs
+Peter Bourgon https://peter.bourgon.org/blog/2017/06/09/theory-of-modern-go.html
+Ben Johnson https://medium.com/@benbjohnson/standard-package-layout-7cdbc8391fc1
+Marcus Olsson https://github.com/marcusolsson/goddd
+https://go.dev/blog/go1.13-errors
+https://lipsum.com
+https://www.simplethread.com/relational-databases-arent-dinosaurs-theyre-sharks/
+sql resources: https://selectstarsql.com/ then move to https://mystery.knightlab.com/
+sql resources: https://www.codecademy.com/learn/learn-sql; https://www.w3schools.com/sql/; https://www.khanacademy.org/computing/computer-programming/sql
+https://go.dev/tour/welcome/1
+https://pace.dev/blog/2020/02/12/why-you-shouldnt-use-func-main-in-golang-by-mat-ryer.html
+
+ Cost:
+ 1. GCP is billing me now actively. Keep an eye on BILLING.
+ 2. Squarespace domain charge 12/year - eazyweather.com 
+ 
+ Q: after login how does the browser know when and how to put the auth session info for the server to behave restful?
+ 
+ CHARSET used is the reason what get printed that makes sense, and what gets printed which is gibberish.
