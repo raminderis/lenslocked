@@ -18,10 +18,12 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func contactHandler(w http.ResponseWriter, r *http.Request) {
+	userID := chi.URLParam(r, "userID")
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	fmt.Fprint(w, `<h1>Contact Us</h1>
 	<p> email: <a href="mailto:raminderis@live.com">ramidneris@live.com</a></p> 
-	<p> phone: <a href="phoneto:4253000115">4253000115</a></p>`)
+	<p> phone: <a href="phoneto:4253000115">4253000115</a></p>
+	<p> UserID: `+userID+`</p>`)
 }
 
 func faqHandler(w http.ResponseWriter, r *http.Request) {
@@ -93,7 +95,19 @@ func main() {
 	r.Use(middleware.Logger)
 
 	r.Get("/", homeHandler)
-	r.Get("/contact", contactHandler)
+	r.Get("/contact/{userID}", contactHandler)
+	// add logger middleware to contact route only
+	// r.With(middleware.Logger).Get("/contact/{userID}", contactHandler)
+	// OR
+	// r.Group(func(r chi.Router) {
+	// 	r.Use(middleware.Logger)
+	// 	r.Get("/contact/{userID}", contactHandler)
+	// })
+	// OR
+	// r.Route("/contact/{userID}", func(r chi.Router) {
+	// 	r.Use(middleware.Logger)
+	// 	r.Get("/", contactHandler)
+	// })
 	r.Get("/faq", faqHandler)
 	r.Get("/dog/*", rawPathHandler)
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
