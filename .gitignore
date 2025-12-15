@@ -1,8 +1,8 @@
 # builds
-./lenslocked
+lenslocked
 
 # modd
-./modd.conf
+modd.conf
 
 # IDE files
 .vscode/
@@ -12,5 +12,9 @@
 
 
 # doc
-./doc 
+doc 
 
+
+# go mod
+go.mod
+go.sum
