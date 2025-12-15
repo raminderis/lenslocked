@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 // ResponseWriter is an interface which implements many methods one of which is the Write method.
@@ -86,17 +89,27 @@ func (router Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	var somePathHandler Router
+	r := chi.NewRouter()
+	r.Use(middleware.Logger)
+
+	r.Get("/", homeHandler)
+	r.Get("/contact", contactHandler)
+	r.Get("/faq", faqHandler)
+	r.Get("/dog/*", rawPathHandler)
+	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+	})
+	// var somePathHandler Router
 	// mux := http.NewServeMux()
 	// mux.HandleFunc("/", handlerFunc)
 	// http.HandleFunc("/", pathHandler)
 	// http.HandleFunc("/contact", contactHandler)
 	// http.HandleFunc("/path/", pathHandler)
 	// var router http.HandlerFunc = pathHandler
-	http.HandleFunc("/", http.HandlerFunc(pathHandler).ServeHTTP)
+	// http.HandleFunc("/", http.HandlerFunc(pathHandler).ServeHTTP)
 	// http.Handle("/", http.HandlerFunc(pathHandler))
 	fmt.Println("With a branch starting the server on :3000...")
 	// http.ListenAndServe(":3000", nil)
-	http.ListenAndServe(":3000", somePathHandler)
+	http.ListenAndServe(":3000", r)
 	// http.ListenAndServe(":3000", router)
 }
