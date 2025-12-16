@@ -5,65 +5,51 @@ import (
 	"html/template"
 	"net/http"
 	"path/filepath"
-	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-// ResponseWriter is an interface which implements many methods one of which is the Write method.
-// The Write method is used to write the response back to the client.
-// Request is the pointer to the struct which contains all the information about the incoming request.
-func homeHandler(w http.ResponseWriter, r *http.Request) {
+type User struct {
+	Email string
+	Phone string
+}
+
+func executeTemplate(w http.ResponseWriter, filepath string, data interface{}) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	tplPath := filepath.Join("templates", "home.gohtml")
-	t, err := template.ParseFiles(tplPath)
+	t, err := template.ParseFiles(filepath)
 	if err != nil {
-		http.Error(w, "Error parsing template", http.StatusInternalServerError)
+		http.Error(w, "Error parsing template ", http.StatusInternalServerError)
 		return
 	}
-	err = t.Execute(w, nil)
+	err = t.Execute(w, data)
 	if err != nil {
 		http.Error(w, "Error executing template", http.StatusInternalServerError)
 		return
 	}
-	// fmt.Fprint(w, "<h1>Welcome to my awesome site!</h1>")
+}
+
+func homeHandler(w http.ResponseWriter, r *http.Request) {
+	tplPath := filepath.Join("templates", "home.gohtml")
+	executeTemplate(w, tplPath, nil)
 }
 
 func contactHandler(w http.ResponseWriter, r *http.Request) {
-	userID := chi.URLParam(r, "userID")
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	fmt.Fprint(w, `<h1>Contact Us</h1>
-	<p> email: <a href="mailto:raminderis@live.com">ramidneris@live.com</a></p> 
-	<p> phone: <a href="phoneto:4253000115">4253000115</a></p>
-	<p> UserID: `+userID+`</p>`)
+	tplPath := filepath.Join("templates", "contact.gohtml")
+	data := User{
+		Email: "contactis@live.com",
+		Phone: "4253222555",
+	}
+	executeTemplate(w, tplPath, data)
 }
 
 func faqHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	fmt.Fprint(w, `<h1>Frequently Asked Questions</h1>
-	<ul>
-		<li><b>Question 1: What is your return policy?</b>
-			<div>Answer:</div>
-			<ul>
-				<li>We accept returns within 30 days of purchase.</li>
-				<li>Items must be in original condition.</li>
-				<li>Refunds will be processed within 5-7 business days.</li>
-			</ul>
-		</li>
-		<li><b>Question 2: Do you offer international shipping?</b>
-			<div>Answer:</div>
-			<ul><li>Yes, we ship to most countries worldwide.</li></ul>
-		</li>
-		<li><b>Question 3: How can I track my order?</b>
-			<div>Answer:</div>
-			<ul><li>You will receive a tracking number via email once your order has shipped.</li></ul>
-		</li>
-		<li><b>Question 4: if you have any questions please contact us at?</b>
-			<div>Answer:</div>
-			<ul><li>Email: <a href="mailto:raminderis@live.com">raminderis@live.com</a></li></ul>
-		</li>
-	</ul>`)
+	tplPath := filepath.Join("templates", "faq.gohtml")
+	data := User{
+		Email: "faqis@live.com",
+		Phone: "4253111555",
+	}
+	executeTemplate(w, tplPath, data)
 }
 
 func rawPathHandler(w http.ResponseWriter, r *http.Request) {
@@ -71,72 +57,17 @@ func rawPathHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "<h1>Raw Path: "+r.URL.RawPath+"</h1>")
 }
 
-func pathHandler(w http.ResponseWriter, r *http.Request) {
-	switch {
-	case r.URL.Path == "/":
-		homeHandler(w, r)
-	case r.URL.Path == "/contact":
-		contactHandler(w, r)
-	case strings.HasPrefix(r.URL.Path, "/dog/"):
-		rawPathHandler(w, r)
-	case r.URL.Path == "/faq":
-		faqHandler(w, r)
-	default:
-		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-	}
-}
-
-type Router struct{}
-
-func (router Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	switch {
-	case r.URL.Path == "/":
-		homeHandler(w, r)
-	case r.URL.Path == "/contact":
-		contactHandler(w, r)
-	case r.URL.Path == "/faq":
-		faqHandler(w, r)
-	case strings.HasPrefix(r.URL.Path, "/dog/"):
-		rawPathHandler(w, r)
-	default:
-		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-	}
-}
-
 func main() {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 
 	r.Get("/", homeHandler)
-	r.Get("/contact/{userID}", contactHandler)
-	// add logger middleware to contact route only
-	// r.With(middleware.Logger).Get("/contact/{userID}", contactHandler)
-	// OR
-	// r.Group(func(r chi.Router) {
-	// 	r.Use(middleware.Logger)
-	// 	r.Get("/contact/{userID}", contactHandler)
-	// })
-	// OR
-	// r.Route("/contact/{userID}", func(r chi.Router) {
-	// 	r.Use(middleware.Logger)
-	// 	r.Get("/", contactHandler)
-	// })
+	r.Get("/contact", contactHandler)
 	r.Get("/faq", faqHandler)
 	r.Get("/dog/*", rawPathHandler)
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 	})
-	// var somePathHandler Router
-	// mux := http.NewServeMux()
-	// mux.HandleFunc("/", handlerFunc)
-	// http.HandleFunc("/", pathHandler)
-	// http.HandleFunc("/contact", contactHandler)
-	// http.HandleFunc("/path/", pathHandler)
-	// var router http.HandlerFunc = pathHandler
-	// http.HandleFunc("/", http.HandlerFunc(pathHandler).ServeHTTP)
-	// http.Handle("/", http.HandlerFunc(pathHandler))
 	fmt.Println("With a branch starting the server on :3000...")
-	// http.ListenAndServe(":3000", nil)
 	http.ListenAndServe(":3000", r)
-	// http.ListenAndServe(":3000", router)
 }
