@@ -1,0 +1,20 @@
+<html>
+<head>
+<title>Hello Template</title>
+<p>age is {{.Age}}</p>
+</head>
+<body>
+<h1>Hello, {{.Name}}</h1>
+<p>Welcome to the experimental Go HTML template!</p>
+<p> Author : {{.Meta.Author}} </p>
+</body>
+</html>
+
+<script>
+    const user = {
+        "name": {{.Name}},
+        "age": {{.Age}},
+        "bio": {{.Meta.Bio}}
+    }
+    console.log(user);
+</script>
