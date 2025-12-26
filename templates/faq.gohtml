@@ -1,3 +1,4 @@
+{{template "header"}}
 <h1>Frequently Asked Questions</h1>
 <ul>
     <li><b>Question 1: What is your return policy?</b>
@@ -19,5 +20,16 @@
     <li><b>Question 4: if you have any questions please contact us at?</b>
         <div>Answer:</div>
         <ul><li>Email: <a href="mailto: {{ .Email }}">{{ .Email }}</a></li></ul>
+        <ul><li>Phone: <a href="text: {{ .Phone }}">{{ .Phone }}</a></li></ul>
     </li>
+    {{ range .QA }}
+        {{ template "qa" . }}
+    {{ end }}
 </ul>
+{{template "footer"}}
+
+
+{{ define "qa" }}
+    <li><b>here {{ .Question }}</b>
+    <ul><li>there {{ .Answer }}</li></ul>
+{{end}}
