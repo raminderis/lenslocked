@@ -2,8 +2,6 @@ package controllers
 
 import (
 	"net/http"
-
-	"github.com/raminderis/lenslocked/views"
 )
 
 type Questions struct {
@@ -17,7 +15,7 @@ type User struct {
 	QA    []Questions
 }
 
-func StaticHandler(tpl views.Template, data User) http.HandlerFunc {
+func StaticHandler(tpl Template, data User) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tpl.Execute(w, data)
 	}
