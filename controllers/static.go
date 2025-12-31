@@ -17,6 +17,6 @@ type User struct {
 
 func StaticHandler(tpl Template, data User) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		tpl.Execute(w, data)
+		tpl.Execute(w, r, data)
 	}
 }

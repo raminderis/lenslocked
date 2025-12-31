@@ -1,7 +1,8 @@
 {{ template "header" . }}
-<h1>Frequently Asked Questions</h1>
-<ul>
-    <li><b>Question 1: What is your return policy?</b>
+<div class="px-6">
+<h1 class="py-4 text-3xl font-bold tracking-tight">Frequently Asked Questions</h1>
+<ul class="grid grid-cols-2 gap-16">
+    <li class="border-t"><b>Question 1: What is your return policy?</b>
         <div>Answer:</div>
         <ul>
             <li>We accept returns within 30 days of purchase.</li>
@@ -9,15 +10,15 @@
             <li>Refunds will be processed within 5-7 business days.</li>
         </ul>
     </li>
-    <li><b>Question 2: Do you offer international shipping?</b>
+    <li class="border-t"><b>Question 2: Do you offer international shipping?</b>
         <div>Answer:</div>
         <ul><li>Yes, we ship to most countries worldwide.</li></ul>
     </li>
-    <li><b>Question 3: How can I track my order?</b>
+    <li class="border-t"><b>Question 3: How can I track my order?</b>
         <div>Answer:</div>
         <ul><li>You will receive a tracking number via email once your order has shipped.</li></ul>
     </li>
-    <li><b>Question 4: if you have any questions please contact us at?</b>
+    <li class="border-t"><b>Question 4: if you have any questions please contact us at?</b>
         <div>Answer:</div>
         <ul><li>Email: <a href="mailto: {{ .Email }}">{{ .Email }}</a></li></ul>
         <ul><li>Phone: <a href="text: {{ .Phone }}">{{ .Phone }}</a></li></ul>
@@ -26,10 +27,11 @@
         {{ template "qa" . }}
     {{ end }}
 </ul>
+</div>
 {{ template "footer" . }}
 
 
 {{ define "qa" }}
-    <li><b>here {{ .Question }}</b>
-    <ul><li>there {{ .Answer }}</li></ul>
+    <li class="border-t"><b>here {{ .Question }}</b>
+    <ul class=""><li>there {{ .Answer }}</li></ul>
 {{end}}

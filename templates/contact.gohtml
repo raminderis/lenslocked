@@ -1,5 +1,7 @@
 {{ template "header" . }}
-<h1>Contact Us</h1>
-<p> email: <a href="mailto:{{ .Email }}">{{ .Email }}</a></p> 
-<p> phone: <a href="tel:{{ .Phone }}">{{ .Phone }}</a></p>
+<div class="px-6">
+<h1 class="py-4 text-3xl font-bold tracking-tight">Contact Us</h1>
+<p> Email: <a href="mailto:{{ .Email }}">{{ .Email }}</a></p> 
+<p> Phone: <a href="tel:{{ .Phone }}">{{ .Phone }}</a></p>
+</div>
 {{ template "footer" . }}

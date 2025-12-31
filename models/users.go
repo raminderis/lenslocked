@@ -1,0 +1,65 @@
+package models
+
+import (
+	"context"
+	"fmt"
+	"strings"
+
+	"github.com/jackc/pgx/v5"
+	"golang.org/x/crypto/bcrypt"
+)
+
+type User struct {
+	ID           int
+	Email        string
+	PasswordHash string
+}
+
+type UserService struct {
+	DB_CONN *pgx.Conn
+}
+
+func (userSvc UserService) Create(email, passwordPlainText string) (*User, error) {
+	email = strings.ToLower(email)
+	passwordHashedBytes, err := bcrypt.GenerateFromPassword([]byte(passwordPlainText), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, fmt.Errorf("create user : %w", err)
+	}
+	// fmt.Println(string(passwordHashedBytes))
+	passwordHashedString := string(passwordHashedBytes)
+	user := User{
+		ID:           1,
+		Email:        email,
+		PasswordHash: passwordHashedString,
+	}
+	row := userSvc.DB_CONN.QueryRow(context.Background(),
+		`INSERT INTO users (email, password_hash)
+		VALUES ($1, $2) RETURNING id;`, email, passwordHashedString)
+	var id int
+	err = row.Scan(&user.ID)
+	if err != nil {
+		return nil, fmt.Errorf("create user : %w", err)
+	}
+	fmt.Println("User inserted ", id)
+	return &user, nil
+}
+
+func (userSvc UserService) Authenticate(email, passwordPlainText string) (*User, error) {
+	email = strings.ToLower(email)
+	user := User{
+		Email: email,
+	}
+	row := userSvc.DB_CONN.QueryRow(context.Background(),
+		`SELECT id, password_hash FROM users 
+		WHERE email = $1`, email)
+	err := row.Scan(&user.ID, &user.PasswordHash)
+	if err != nil {
+		return nil, fmt.Errorf("authenticate user : %w", err)
+	}
+	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(passwordPlainText))
+	if err != nil {
+		return nil, fmt.Errorf("authenitcate user : %w", err)
+	}
+	fmt.Println("User authenticated ", email)
+	return &user, nil
+}

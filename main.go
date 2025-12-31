@@ -1,17 +1,37 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/gorilla/csrf"
 	"github.com/raminderis/lenslocked/controllers"
+	"github.com/raminderis/lenslocked/models"
 	"github.com/raminderis/lenslocked/templates"
 	"github.com/raminderis/lenslocked/views"
 )
 
+func timeHandlerProcessing(h http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		h(w, r)
+		fmt.Println("Request Time: ", time.Since(start))
+	}
+}
+
 func main() {
+	dbCfg := models.DefaultPostgresConfig()
+	pgxConn, err := models.Open(dbCfg)
+	if err != nil {
+		panic(err)
+	}
+	defer pgxConn.Close(context.Background())
+	fmt.Println("Connected to DB")
+
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 
@@ -41,16 +61,23 @@ func main() {
 	r.Get("/contact", controllers.StaticHandler(t, data))
 
 	t = views.Must(views.ParseFS(templates.FS, "faq.gohtml", "tailwind.gohtml"))
-	r.Get("/faq", controllers.StaticHandler(t, data))
+	r.Get("/faq", timeHandlerProcessing(controllers.StaticHandler(t, data)))
 
 	usersC := controllers.Users{}
+	usersC.Templates.General = views.Must(views.ParseFS(templates.FS, "general-page.gohtml", "tailwind.gohtml"))
+
 	usersC.Templates.New = views.Must(views.ParseFS(templates.FS, "signup.gohtml", "tailwind.gohtml"))
+	usersC.UserService = &models.UserService{
+		DB_CONN: pgxConn,
+	}
 	r.Get("/signup", usersC.New)
 	r.Post("/users", usersC.Create)
 
-	t = views.Must(views.ParseFS(templates.FS, "signin.gohtml", "tailwind.gohtml"))
-	r.Get("/signin", controllers.StaticHandler(t, data))
+	usersC.Templates.Signin = views.Must(views.ParseFS(templates.FS, "signin.gohtml", "tailwind.gohtml"))
+	r.Get("/signin", usersC.Signin)
+	r.Post("/signin", usersC.SigninProcess)
 
+	r.Get("/users/me", usersC.CurrentUser)
 	t = views.Must(views.ParseFS(templates.FS, "reset-pw.gohtml", "tailwind.gohtml"))
 	r.Get("/reset-pw", controllers.StaticHandler(t, data))
 
@@ -58,5 +85,7 @@ func main() {
 		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 	})
 	fmt.Println("With a branch starting the server on :3000...")
-	http.ListenAndServe(":3000", r)
+	csrfKey := "Q7f9K2pL8xR3mV1tC6zH4bN0wP5sJ8dF"
+	csrfMiddleware := csrf.Protect([]byte(csrfKey), csrf.Secure(true), csrf.TrustedOrigins([]string{"localhost:3000"}))
+	http.ListenAndServe(":3000", csrfMiddleware(r))
 }

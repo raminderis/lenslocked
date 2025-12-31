@@ -82,7 +82,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("Tables created ", id)
+	fmt.Println("User inserted ", id)
 
 	name = "shahh singh"
 	row = conn.QueryRow(context.Background(),
