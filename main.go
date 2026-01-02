@@ -70,6 +70,10 @@ func main() {
 	usersC.UserService = &models.UserService{
 		DB_CONN: pgxConn,
 	}
+	usersC.SessionService = &models.SessionService{
+		DB_CONN:       pgxConn,
+		BytesPerToken: 32,
+	}
 	r.Get("/signup", usersC.New)
 	r.Post("/users", usersC.Create)
 

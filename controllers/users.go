@@ -13,8 +13,9 @@ type Users struct {
 		Signin  Template
 		General Template
 	}
-	Message     string
-	UserService *models.UserService
+	Message        string
+	UserService    *models.UserService
+	SessionService *models.SessionService
 }
 
 type Account struct {
@@ -63,11 +64,20 @@ func (u Users) Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
-	// fmt.Fprintf(w, "User created: %v", user.Email)
-	recievedAcct := Account{
-		Message: "User " + user.Email + " is created",
+	session, err := u.SessionService.Create(user.ID)
+	if err != nil {
+		fmt.Println(err)
+		http.Redirect(w, r, "/signin", http.StatusFound)
+		return
 	}
-	u.Templates.General.Execute(w, r, recievedAcct)
+
+	setCookie(w, CookieSession, session.Token)
+	http.Redirect(w, r, "/users/me", http.StatusFound)
+	// fmt.Fprintf(w, "User created: %v", user.Email)
+	// recievedAcct := Account{
+	// 	Message: "User " + user.Email + " is created",
+	// }
+	// u.Templates.General.Execute(w, r, recievedAcct)
 }
 
 func (u Users) SigninProcess(w http.ResponseWriter, r *http.Request) {
@@ -90,31 +100,37 @@ func (u Users) SigninProcess(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// fmt.Fprintf(w, "User authenticated: %+v", user.Email)
-	cookie := http.Cookie{
-		Name:     "email",
-		Value:    newAcct.Email,
-		Path:     "/",
-		HttpOnly: true,
+	session, err := u.SessionService.Create(user.ID)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
 	}
-	http.SetCookie(w, &cookie)
-	recievedAcct := Account{
-		Message: "User " + user.Email + " is authenticated",
-	}
-	u.Templates.General.Execute(w, r, recievedAcct)
+	setCookie(w, CookieSession, session.Token)
+	http.Redirect(w, r, "/users/me", http.StatusFound)
+
+	// recievedAcct := Account{
+	// 	Message: "User " + user.Email + " is authenticated",
+	// }
+	// u.Templates.General.Execute(w, r, recievedAcct)
 }
 
 func (u Users) CurrentUser(w http.ResponseWriter, r *http.Request) {
-	emailCookie, err := r.Cookie("email")
-	var recievedAcct Account
+	token, err := readCookie(r, CookieSession)
 	if err != nil {
-		recievedAcct = Account{
-			Message: "Email cookie couldnt be read",
-		}
-	} else {
-		recievedAcct = Account{
-			Message: "Email cookie is " + emailCookie.Value,
-		}
+		fmt.Println(err)
+		http.Redirect(w, r, "signin", http.StatusFound)
+		return
 	}
-
+	user, err := u.SessionService.User(token)
+	if err != nil {
+		fmt.Println(err)
+		http.Redirect(w, r, "signin", http.StatusFound)
+		return
+	}
+	fmt.Println("somewhere here")
+	recievedAcct := Account{
+		Message: "Current User is: " + user.Email,
+	}
 	u.Templates.General.Execute(w, r, recievedAcct)
 }
