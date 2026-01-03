@@ -10,6 +10,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/gorilla/csrf"
 	"github.com/raminderis/lenslocked/controllers"
+	"github.com/raminderis/lenslocked/migrations"
 	"github.com/raminderis/lenslocked/models"
 	"github.com/raminderis/lenslocked/templates"
 	"github.com/raminderis/lenslocked/views"
@@ -31,7 +32,10 @@ func main() {
 	}
 	defer pgxConn.Close(context.Background())
 	fmt.Println("Connected to DB")
-
+	err = dbCfg.MigrateFS(migrations.FS)
+	if err != nil {
+		panic(err)
+	}
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 
@@ -80,6 +84,7 @@ func main() {
 	usersC.Templates.Signin = views.Must(views.ParseFS(templates.FS, "signin.gohtml", "tailwind.gohtml"))
 	r.Get("/signin", usersC.Signin)
 	r.Post("/signin", usersC.SigninProcess)
+	r.Post("/signout", usersC.ProcessSignout)
 
 	r.Get("/users/me", usersC.CurrentUser)
 	t = views.Must(views.ParseFS(templates.FS, "reset-pw.gohtml", "tailwind.gohtml"))

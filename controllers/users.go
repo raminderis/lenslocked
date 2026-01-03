@@ -128,9 +128,28 @@ func (u Users) CurrentUser(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "signin", http.StatusFound)
 		return
 	}
-	fmt.Println("somewhere here")
 	recievedAcct := Account{
 		Message: "Current User is: " + user.Email,
 	}
 	u.Templates.General.Execute(w, r, recievedAcct)
+}
+
+func (u Users) ProcessSignout(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/plain")
+	token, err := readCookie(r, CookieSession)
+	if err != nil {
+		fmt.Println(err)
+		http.Redirect(w, r, "signin", http.StatusFound)
+		return
+	}
+	err = u.SessionService.Delete(token)
+	if err != nil {
+		fmt.Println(err)
+		recievedAcct := Account{
+			Message: "Signout Process something went wrong. " + err.Error(),
+		}
+		u.Templates.General.Execute(w, r, recievedAcct)
+	}
+	deleteCookie(w, CookieSession)
+	http.Redirect(w, r, "signin", http.StatusFound)
 }
