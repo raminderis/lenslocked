@@ -21,3 +21,7 @@ go.sum
 
 # docker compose files
 docker-compose.yml
+
+
+#env files
+.env
