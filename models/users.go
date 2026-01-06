@@ -19,7 +19,7 @@ type UserService struct {
 	DB_CONN *pgx.Conn
 }
 
-func (userSvc UserService) Create(email, passwordPlainText string) (*User, error) {
+func (userSvc *UserService) Create(email, passwordPlainText string) (*User, error) {
 	email = strings.ToLower(email)
 	passwordHashedBytes, err := bcrypt.GenerateFromPassword([]byte(passwordPlainText), bcrypt.DefaultCost)
 	if err != nil {
@@ -44,7 +44,7 @@ func (userSvc UserService) Create(email, passwordPlainText string) (*User, error
 	return &user, nil
 }
 
-func (userSvc UserService) Authenticate(email, passwordPlainText string) (*User, error) {
+func (userSvc *UserService) Authenticate(email, passwordPlainText string) (*User, error) {
 	email = strings.ToLower(email)
 	user := User{
 		Email: email,
@@ -64,4 +64,18 @@ func (userSvc UserService) Authenticate(email, passwordPlainText string) (*User,
 	return &user, nil
 }
 
-// func (userSvc UserService)
+func (userSvc *UserService) UpdatePassword(userID int, password string) error {
+	passwordHashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return fmt.Errorf("update password : %w", err)
+	}
+	passwordHashedString := string(passwordHashedBytes)
+	_, err = userSvc.DB_CONN.Exec(context.Background(), `
+		UPDATE users
+		SET password_hash = $2
+		WHERE id = $1;`, userID, passwordHashedString)
+	if err != nil {
+		return fmt.Errorf("Update Password: %w", err)
+	}
+	return nil
+}

@@ -1,9 +1,15 @@
 package models
 
 import (
+	"context"
+	"crypto/sha256"
+	"encoding/base64"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/raminderis/lenslocked/rand"
 )
 
 const (
@@ -12,7 +18,7 @@ const (
 
 type PasswordReset struct {
 	ID        int
-	UserID    string
+	UserID    int
 	Token     string
 	TokenHash string
 	ExpiresAt time.Time
@@ -24,12 +30,87 @@ type PasswordResetService struct {
 	Duration      time.Duration
 }
 
-func (resetService *PasswordResetService) Create(email string) (*PasswordReset, error) {
+func (resetService *PasswordResetService) hash(token string) string {
+	tokenHash := sha256.Sum256([]byte(token))
+	return base64.URLEncoding.EncodeToString(tokenHash[:])
+}
 
-	return nil, nil
+func (resetService *PasswordResetService) Create(email string) (*PasswordReset, error) {
+	email = strings.ToLower(email)
+	var userID int
+	row := resetService.DB_CONN.QueryRow(context.Background(), `
+		SELECT id FROM users WHERE email = $1;`, email)
+	err := row.Scan(&userID)
+	if err != nil {
+		return nil, fmt.Errorf("reset service create: %w", err)
+	}
+	bytesPerToken := resetService.BytesPerToken
+	if bytesPerToken < MinBytesPerToken {
+		bytesPerToken = MinBytesPerToken
+	}
+	token, err := rand.String(bytesPerToken)
+	if err != nil {
+		return nil, fmt.Errorf("reset service create : %w", err)
+	}
+	duration := resetService.Duration
+	if duration == 0 {
+		duration = DefaultResetDuration
+	}
+	pwReset := PasswordReset{
+		UserID:    userID,
+		Token:     token,
+		TokenHash: resetService.hash(token),
+		ExpiresAt: time.Now().Add(duration),
+	}
+	row = resetService.DB_CONN.QueryRow(context.Background(),
+		`INSERT INTO password_resets (user_id, token_hash, expires_at)
+			VALUES ($1, $2, $3) ON CONFLICT (user_id) DO
+		UPDATE
+		SET token_hash = $2, expires_at = $3 RETURNING id;`, pwReset.UserID, pwReset.TokenHash, pwReset.ExpiresAt)
+	err = row.Scan(&pwReset.ID)
+	if err != nil {
+		return nil, fmt.Errorf("reset service create : %w", err)
+	}
+	fmt.Println("Reset Token inserted ", pwReset.ID)
+	return &pwReset, nil
 }
 
 func (resetService *PasswordResetService) Consume(token string) (*User, error) {
+	// token is valid matches and hasnt expired
+	// update password
+	tokenHash := resetService.hash(token)
+	var user User
+	var pwReset PasswordReset
+	row := resetService.DB_CONN.QueryRow(context.Background(), `
+		SELECT password_resets.id,
+			password_resets.expires_at,
+			users.id,
+			users.email,
+			users.password_hash
+		FROM password_resets
+			JOIN users ON users.id = password_resets.user_id
+		WHERE password_resets.token_hash = $1;	
+	`, tokenHash)
+	err := row.Scan(&pwReset.ID, &pwReset.ExpiresAt, &user.ID, &user.Email, &user.PasswordHash)
+	if err != nil {
+		return nil, fmt.Errorf("Password reset consume : %w", err)
+	}
+	if time.Now().After(pwReset.ExpiresAt) {
+		return nil, fmt.Errorf("Password reset consume: Token Expired %v", token)
+	}
+	err = resetService.delete(pwReset.ID)
+	if err != nil {
+		return nil, fmt.Errorf("reset pw consume: %w", err)
+	}
+	return &user, nil
+}
 
-	return nil, nil
+func (resetService *PasswordResetService) delete(id int) error {
+	_, err := resetService.DB_CONN.Exec(context.Background(), `
+		DELETE FROM password_resets
+		WHERE id = $1;`, id)
+	if err != nil {
+		return fmt.Errorf("Reset Token Consume Delete : %w", err)
+	}
+	return nil
 }
