@@ -55,6 +55,11 @@ func loadEnvConfig() (config, error) {
 	}
 	cfg.SMTP.Username = os.Getenv("SMTP_USERNAME")
 	cfg.SMTP.Password = os.Getenv("SMTP_PASSWORD")
+	smtp_ssl := os.Getenv("SMTP_SSL")
+	cfg.SMTP.DialerSSL, err = strconv.ParseBool(smtp_ssl)
+	if err != nil {
+		return cfg, err
+	}
 
 	cfg.CSRF.Key = "Q7f9K2pL8xR3mV1tC6zH4bN0wP5sJ8dF"
 	cfg.CSRF.Secure = true

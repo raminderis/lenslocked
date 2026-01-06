@@ -30,12 +30,18 @@ func main() {
 	}
 	username := os.Getenv("SMTP_USERNAME")
 	password := os.Getenv("SMTP_PASSWORD")
+	smtp_ssl_string := os.Getenv("SMTP_SSL")
+	smtp_ssl_bool, err := strconv.ParseBool(smtp_ssl_string)
+	if err != nil {
+		panic(err)
+	}
 	es := models.NewEmailService(models.SMTPConfig{
 		Host:     host,
 		Port:     port,
 		Username: username,
 		Password: password,
 	})
+	es.DailerSSL = smtp_ssl_bool
 	// err := es.Send(email)
 	// if err != nil {
 	// 	panic(err)

@@ -23,6 +23,11 @@ func main2() {
 	}
 	username := os.Getenv("SMTP_USERNAME")
 	password := os.Getenv("SMTP_PASSWORD")
+	smtp_ssl_string := os.Getenv("SMTP_SSL")
+	smtp_ssl_bool, err := strconv.ParseBool(smtp_ssl_string)
+	if err != nil {
+		panic(err)
+	}
 	from := "test@lenslocked.com"
 	to := "raminderis@live.com"
 	subject := "This is a test email subject line"
@@ -37,7 +42,7 @@ func main2() {
 	msg.WriteTo(os.Stdout)
 	fmt.Println("moving to send the mail")
 	dialer := gomail.NewDialer(host, port, username, password)
-	dialer.SSL = false
+	dialer.SSL = smtp_ssl_bool
 	err = dialer.DialAndSend(msg)
 	if err != nil {
 		panic(err)

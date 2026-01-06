@@ -20,14 +20,16 @@ type Email struct {
 
 type EmailService struct {
 	DefaultSender string
+	DailerSSL     bool
 	dialer        *gomail.Dialer
 }
 
 type SMTPConfig struct {
-	Host     string
-	Port     int
-	Username string
-	Password string
+	Host      string
+	Port      int
+	Username  string
+	Password  string
+	DialerSSL bool
 }
 
 func NewEmailService(config SMTPConfig) *EmailService {
@@ -52,7 +54,7 @@ func (es *EmailService) Send(email Email) error {
 	case email.HTML != "":
 		msg.SetBody("test/html", email.HTML)
 	}
-	es.dialer.SSL = false
+	es.dialer.SSL = es.DailerSSL
 	err := es.dialer.DialAndSend(msg)
 	if err != nil {
 		return err
