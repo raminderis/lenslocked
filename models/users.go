@@ -63,3 +63,5 @@ func (userSvc UserService) Authenticate(email, passwordPlainText string) (*User,
 	fmt.Println("User authenticated ", email)
 	return &user, nil
 }
+
+// func (userSvc UserService)

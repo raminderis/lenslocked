@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/raminderis/lenslocked/context"
 	"github.com/raminderis/lenslocked/models"
@@ -10,13 +11,17 @@ import (
 
 type Users struct {
 	Templates struct {
-		New     Template
-		Signin  Template
-		General Template
+		New            Template
+		Signin         Template
+		General        Template
+		ForgotPassword Template
+		CheckYourEmail Template
 	}
-	Message        string
-	UserService    *models.UserService
-	SessionService *models.SessionService
+	Message              string
+	UserService          *models.UserService
+	SessionService       *models.SessionService
+	PasswordResetService *models.PasswordResetService
+	EmailService         *models.EmailService
 }
 
 type Account struct {
@@ -164,6 +169,38 @@ func (u Users) ProcessSignout(w http.ResponseWriter, r *http.Request) {
 	}
 	deleteCookie(w, CookieSession)
 	http.Redirect(w, r, "signin", http.StatusFound)
+}
+
+func (u Users) ForgotPassword(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/plain")
+	recievedAcct := Account{
+		Email: r.FormValue("email"),
+	}
+	u.Templates.ForgotPassword.Execute(w, r, recievedAcct)
+}
+
+func (u Users) ProcessForgotPassword(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/plain")
+	recievedAcct := Account{
+		Email: r.FormValue("email"),
+	}
+	pwReset, err := u.PasswordResetService.Create(recievedAcct.Email)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
+	}
+	vals := url.Values{
+		"token": {pwReset.Token},
+	}
+	resetURL := "http://localhost:3000/reset-pw?" + vals.Encode()
+	err = u.EmailService.ForgotPassword(recievedAcct.Email, resetURL)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
+	}
+	u.Templates.CheckYourEmail.Execute(w, r, recievedAcct)
 }
 
 func (umw UserMiddleware) SetUser(next http.Handler) http.Handler {
