@@ -72,9 +72,9 @@ func (cfg PostgresConfig) MigrateFS(migrationFS fs.FS) error {
 		fmt.Println(" -", e.Name())
 	}
 
-	if err != nil {
-		return fmt.Errorf("DB MigrateFS error 1: %w", err)
-	}
+	// if err != nil {
+	// 	return fmt.Errorf("DB MigrateFS error 1: %w", err)
+	// }
 	db, err := sql.Open("pgx", connString)
 	if err != nil {
 		return fmt.Errorf("DB MigrateFS error 2: %w", err)
