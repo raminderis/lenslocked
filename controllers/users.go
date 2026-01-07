@@ -73,7 +73,8 @@ func (u Users) Create(w http.ResponseWriter, r *http.Request) {
 	user, err := u.UserService.Create(newAcct.Email, newAcct.Password)
 	if err != nil {
 		fmt.Println(err)
-		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		u.Templates.New.Execute(w, r, newAcct, err)
+		// http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
 	session, err := u.SessionService.Create(user.ID)

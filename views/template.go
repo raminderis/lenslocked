@@ -30,6 +30,9 @@ func ParseFS(fs fs.FS, patterns ...string) (Template, error) {
 		"currentUser": func() (template.HTML, error) {
 			return "", fmt.Errorf("currentUser not implemented")
 		},
+		"errors": func() (template.HTML, error) {
+			return "", fmt.Errorf("errors not implemented")
+		},
 	})
 	t, err := t.ParseFS(fs, patterns...)
 	if err != nil {
@@ -57,7 +60,7 @@ type Template struct {
 	htmlTpl *template.Template
 }
 
-func (t Template) Execute(w http.ResponseWriter, r *http.Request, data interface{}) {
+func (t Template) Execute(w http.ResponseWriter, r *http.Request, data interface{}, errs ...error) {
 	tpl, err := t.htmlTpl.Clone()
 	if err != nil {
 		log.Printf("cloning template error: %v", err)
@@ -71,6 +74,13 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data interface
 			},
 			"currentUser": func() *models.User {
 				return context.User(r.Context())
+			},
+			"errors": func() []string {
+				var errMessages []string
+				for _, e := range errs {
+					errMessages = append(errMessages, e.Error())
+				}
+				return errMessages
 			},
 		},
 	)
