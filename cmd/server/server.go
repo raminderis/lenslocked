@@ -46,7 +46,16 @@ func loadEnvConfig() (config, error) {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-	cfg.PSQL = models.DefaultPostgresConfig()
+	cfg.PSQL = models.PostgresConfig{
+		Host:     os.Getenv("PSQL_HOST"),
+		Port:     os.Getenv("PSQL_PORT"),
+		User:     os.Getenv("PSQL_USER"),
+		Password: os.Getenv("PSQL_PASSWORD"),
+		Database: os.Getenv("PSQL_DATABASE"),
+	}
+	if cfg.PSQL.Host == "" || cfg.PSQL.Port == "" || cfg.PSQL.User == "" || cfg.PSQL.Password == "" || cfg.PSQL.Database == "" {
+		return cfg, fmt.Errorf("incomplete PSQL configuration in environment variables")
+	}
 	cfg.SMTP.Host = os.Getenv("SMTP_HOST")
 	portStr := os.Getenv("SMTP_PORT")
 	cfg.SMTP.Port, err = strconv.Atoi(portStr)
@@ -61,10 +70,10 @@ func loadEnvConfig() (config, error) {
 		return cfg, err
 	}
 
-	cfg.CSRF.Key = "Q7f9K2pL8xR3mV1tC6zH4bN0wP5sJ8dF"
-	cfg.CSRF.Secure = true
+	cfg.CSRF.Key = os.Getenv("CSRF_KEY")
+	cfg.CSRF.Secure = os.Getenv("CSRF_SECURE") == "true"
 
-	cfg.Server.Address = ":3000"
+	cfg.Server.Address = os.Getenv("SERVER_ADDRESS")
 	return cfg, nil
 }
 
