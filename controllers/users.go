@@ -1,11 +1,13 @@
 package controllers
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
 
 	"github.com/raminderis/lenslocked/context"
+	apperrors "github.com/raminderis/lenslocked/errors"
 	"github.com/raminderis/lenslocked/models"
 )
 
@@ -73,6 +75,9 @@ func (u Users) Create(w http.ResponseWriter, r *http.Request) {
 	user, err := u.UserService.Create(newAcct.Email, newAcct.Password)
 	if err != nil {
 		fmt.Println(err)
+		if errors.Is(err, models.ErrEmailTaken) {
+			err = apperrors.Publicmyerror(err, "Email address is already taken")
+		}
 		u.Templates.New.Execute(w, r, newAcct, err)
 		// http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return

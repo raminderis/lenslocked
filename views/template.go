@@ -2,6 +2,7 @@ package views
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"html/template"
 	"io"
@@ -13,6 +14,10 @@ import (
 	"github.com/raminderis/lenslocked/context"
 	"github.com/raminderis/lenslocked/models"
 )
+
+type public interface {
+	Public() string
+}
 
 func Must(t Template, err error) Template {
 	if err != nil {
@@ -67,6 +72,7 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data interface
 		http.Error(w, "Error cloning template", http.StatusInternalServerError)
 		return
 	}
+	errMsgs := errMessages(errs)
 	tpl.Funcs(
 		template.FuncMap{
 			"csrfField": func() template.HTML {
@@ -76,11 +82,7 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data interface
 				return context.User(r.Context())
 			},
 			"errors": func() []string {
-				var errMessages []string
-				for _, e := range errs {
-					errMessages = append(errMessages, e.Error())
-				}
-				return errMessages
+				return errMsgs
 			},
 		},
 	)
@@ -93,4 +95,18 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data interface
 		return
 	}
 	io.Copy(w, &buf)
+}
+
+func errMessages(errs []error) []string {
+	var errMsgs []string
+	for _, err := range errs {
+		var pubError public
+		if errors.As(err, &pubError) {
+			errMsgs = append(errMsgs, pubError.Public())
+		} else {
+			fmt.Println(err)
+			errMsgs = append(errMsgs, "Something went wrong. Please try again.")
+		}
+	}
+	return errMsgs
 }
