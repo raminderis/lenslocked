@@ -23,5 +23,11 @@ go.sum
 docker-compose.yml
 
 
+# npm files
+tailwind/node_modules
+package-lock.json
+npm-debug.log
+
+
 #env files
 .env
