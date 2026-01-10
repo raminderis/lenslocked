@@ -84,18 +84,25 @@ func main() {
 		panic(err)
 	}
 
+	err = run(cfg)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func run(cfg config) error {
 	// Setup the database
 	// dbCfg := models.DefaultPostgresConfig()
 	pgxConn, err := models.Open(cfg.PSQL)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	defer pgxConn.Close(context.Background())
 	fmt.Println("Connected to DB")
 
 	err = cfg.PSQL.MigrateFS(migrations.FS)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	// Setup Services aka Initialize Controller
@@ -179,13 +186,13 @@ func main() {
 
 	})
 
+	assetHandler := http.FileServer(http.Dir("assets"))
+	r.Get("/assets/*", http.StripPrefix("/assets/", assetHandler).ServeHTTP)
+
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 	})
 
 	fmt.Printf("With a branch starting the server on %s...", cfg.Server.Address)
-	err = http.ListenAndServe(cfg.Server.Address, r)
-	if err != nil {
-		panic(err)
-	}
+	return http.ListenAndServe(cfg.Server.Address, r)
 }

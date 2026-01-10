@@ -1,0 +1,21 @@
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: go-web-server
+    restart: always
+    volumes:
+      - ./images:/app/images
+    depends_on:
+      - db
+
+  caddy:
+    image: caddy
+    container_name: caddy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
