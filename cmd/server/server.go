@@ -18,6 +18,7 @@ import (
 	"github.com/raminderis/lenslocked/models"
 	"github.com/raminderis/lenslocked/templates"
 	"github.com/raminderis/lenslocked/views"
+	"golang.org/x/oauth2"
 )
 
 func timeHandlerProcessing(h http.HandlerFunc) http.HandlerFunc {
@@ -38,6 +39,7 @@ type config struct {
 	Server struct {
 		Address string
 	}
+	OAuthProviders map[string]*oauth2.Config
 }
 
 func loadEnvConfig() (config, error) {
@@ -74,6 +76,22 @@ func loadEnvConfig() (config, error) {
 	cfg.CSRF.Secure = os.Getenv("CSRF_SECURE") == "true"
 
 	cfg.Server.Address = os.Getenv("SERVER_ADDRESS")
+	cfg.OAuthProviders = make(map[string]*oauth2.Config)
+
+	dropboxID := os.Getenv("DROPBOX_APP_ID")
+	dropboxSecret := os.Getenv("DROPBOX_APP_SECRET")
+	if dropboxID != "" && dropboxSecret != "" {
+		cfg.OAuthProviders["dropbox"] = &oauth2.Config{
+			ClientID:     dropboxID,
+			ClientSecret: dropboxSecret,
+			Scopes:       []string{"files.content.read", "files.metadata.read"},
+			Endpoint: oauth2.Endpoint{
+				AuthURL:  "https://www.dropbox.com/oauth2/authorize",
+				TokenURL: "https://api.dropboxapi.com/oauth2/token",
+			},
+		}
+	}
+
 	return cfg, nil
 }
 
@@ -134,6 +152,9 @@ func run(cfg config) error {
 	csrfKey := cfg.CSRF.Key
 	csrfMiddleware := csrf.Protect([]byte(csrfKey), csrf.Secure(cfg.CSRF.Secure), csrf.TrustedOrigins([]string{"localhost:3000"}))
 
+	oauthC := controllers.OAuth{
+		ProviderConfigs: cfg.OAuthProviders,
+	}
 	// Set up router and routes
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
@@ -185,7 +206,11 @@ func run(cfg config) error {
 		})
 
 	})
-
+	r.Route("/oauth/{provider}", func(r chi.Router) {
+		r.Use(umw.RequireUser)
+		r.Get("/connect", oauthC.Connect)
+		r.Get("/callback", oauthC.Callback)
+	})
 	assetHandler := http.FileServer(http.Dir("assets"))
 	r.Get("/assets/*", http.StripPrefix("/assets/", assetHandler).ServeHTTP)
 
