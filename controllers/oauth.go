@@ -58,9 +58,7 @@ func (oa OAuth) Callback(w http.ResponseWriter, r *http.Request) {
 	}
 	cookieVerifier, err := readCookie(r, "pkce_verifier")
 	if err != nil {
-		if err != nil {
-			fmt.Println("Error reading cookie:", err)
-		}
+		fmt.Println("Error reading cookie:", err)
 		http.Error(w, "Invalid Verifier state", http.StatusBadRequest)
 		return
 	}
